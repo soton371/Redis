@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from redis import Redis
 from httpx import AsyncClient
 import json
+import logging
 
 app = FastAPI()
 
@@ -19,12 +20,14 @@ async def shutdown_event():
 
 @app.get('/entries')
 async def read_item():
-    value = app.state.redis.get('entries')
-
+    value = app.state.redis.get('entries6')
     if value is None:
         response = await app.state.http_client.get('https://api.publicapis.org/entries')
-        value = response
-        data_str = json.dumps(value)
-        app.state.redis.set('entries', data_str)
+        value = response.json()
 
-    return json.loads(value)
+        data_str = json.dumps(value)
+        app.state.redis.set('entries6', data_str)
+
+        return value
+    else:
+        return json.loads(value)
